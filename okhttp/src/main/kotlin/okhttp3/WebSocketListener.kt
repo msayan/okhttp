@@ -16,7 +16,6 @@
 package okhttp3
 
 import okio.ByteString
-import java.net.http.WebSocket
 
 abstract class WebSocketListener {
   /**
