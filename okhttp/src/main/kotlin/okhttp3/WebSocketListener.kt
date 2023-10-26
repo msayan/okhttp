@@ -16,6 +16,7 @@
 package okhttp3
 
 import okio.ByteString
+import java.net.http.WebSocket
 
 abstract class WebSocketListener {
   /**
@@ -52,5 +53,11 @@ abstract class WebSocketListener {
    * listener will be made.
    */
   open fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+  }
+
+  open fun onPingSuccess(webSocket: WebSocket, response: ByteString){
+  }
+
+  open fun onPingFailed(webSocket: WebSocket) {
   }
 }

@@ -348,7 +348,7 @@ class RealWebSocket(
   }
 
   @Synchronized override fun onReadPong(payload: ByteString) {
-    // This API doesn't expose pings.
+    listener.onPingSuccess(this, payload)
     receivedPongCount++
     awaitingPong = false
   }
@@ -560,6 +560,7 @@ class RealWebSocket(
     }
 
     if (failedPing != -1) {
+      listener.onPingFailed(this)
       failWebSocket(SocketTimeoutException("sent ping but didn't receive pong within " +
           "${pingIntervalMillis}ms (after ${failedPing - 1} successful ping/pongs)"), null)
       return
