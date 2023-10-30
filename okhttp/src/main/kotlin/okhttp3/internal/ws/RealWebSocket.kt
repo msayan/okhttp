@@ -548,6 +548,10 @@ class RealWebSocket(
     }
   }
 
+  fun sendPing() {
+    writePingFrame()
+  }
+
   internal fun writePingFrame() {
     val writer: WebSocketWriter
     val failedPing: Int
