@@ -74,4 +74,10 @@ abstract class WebSocketListener {
     response: Response?,
   ) {
   }
+
+  open fun onPingSuccess(webSocket: WebSocket, response: ByteString) {
+  }
+
+  open fun onPingFailed(webSocket: WebSocket) {
+  }
 }

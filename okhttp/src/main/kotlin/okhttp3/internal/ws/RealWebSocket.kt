@@ -134,7 +134,8 @@ class RealWebSocket(
 
   override fun request(): Request = originalRequest
 
-  @Synchronized override fun queueSize(): Long = queueSize
+  @Synchronized
+  override fun queueSize(): Long = queueSize
 
   override fun cancel() {
     call!!.cancel()
@@ -381,11 +382,14 @@ class RealWebSocket(
     taskQueue.idleLatch().await(10, TimeUnit.SECONDS)
   }
 
-  @Synchronized fun sentPingCount(): Int = sentPingCount
+  @Synchronized
+  fun sentPingCount(): Int = sentPingCount
 
-  @Synchronized fun receivedPingCount(): Int = receivedPingCount
+  @Synchronized
+  fun receivedPingCount(): Int = receivedPingCount
 
-  @Synchronized fun receivedPongCount(): Int = receivedPongCount
+  @Synchronized
+  fun receivedPongCount(): Int = receivedPongCount
 
   @Throws(IOException::class)
   override fun onReadMessage(text: String) {
@@ -397,7 +401,8 @@ class RealWebSocket(
     listener.onMessage(this, bytes)
   }
 
-  @Synchronized override fun onReadPing(payload: ByteString) {
+  @Synchronized
+  override fun onReadPing(payload: ByteString) {
     // Don't respond to pings after we've failed or sent the close frame.
     if (failed || enqueuedClose && messageAndCloseQueue.isEmpty()) return
 
@@ -406,10 +411,16 @@ class RealWebSocket(
     receivedPingCount++
   }
 
-  @Synchronized override fun onReadPong(payload: ByteString) {
+  @Synchronized
+  override fun onReadPong(payload: ByteString) {
     // This API doesn't expose pings.
+    listener.onPingSuccess(this, payload)
     receivedPongCount++
     awaitingPong = false
+  }
+
+  fun sendPing() {
+    writePingFrame()
   }
 
   override fun onReadClose(
@@ -437,7 +448,8 @@ class RealWebSocket(
     return send(bytes, OPCODE_BINARY)
   }
 
-  @Synchronized private fun send(
+  @Synchronized
+  private fun send(
     data: ByteString,
     formatOpcode: Int,
   ): Boolean {
@@ -457,7 +469,8 @@ class RealWebSocket(
     return true
   }
 
-  @Synchronized fun pong(payload: ByteString): Boolean {
+  @Synchronized
+  fun pong(payload: ByteString): Boolean {
     // Don't send pongs after we've failed or sent the close frame.
     if (failed || enqueuedClose && messageAndCloseQueue.isEmpty()) return false
 
@@ -473,7 +486,8 @@ class RealWebSocket(
     return close(code, reason, webSocketCloseTimeout)
   }
 
-  @Synchronized fun close(
+  @Synchronized
+  fun close(
     code: Int,
     reason: String?,
     cancelAfterCloseMillis: Long,
@@ -605,12 +619,13 @@ class RealWebSocket(
     }
 
     if (failedPing != -1) {
+      listener.onPingFailed(this)
       failWebSocket(
         e =
-          SocketTimeoutException(
-            "sent ping but didn't receive pong within " +
-              "${pingIntervalMillis}ms (after ${failedPing - 1} successful ping/pongs)",
-          ),
+        SocketTimeoutException(
+          "sent ping but didn't receive pong within " +
+            "${pingIntervalMillis}ms (after ${failedPing - 1} successful ping/pongs)",
+        ),
         isWriter = true,
       )
       return
